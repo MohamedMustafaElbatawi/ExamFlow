@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import {
   FileSpreadsheet,
@@ -9,28 +10,32 @@ import {
   AlertCircle,
   PlayCircle,
   ArrowRight,
+  ArrowLeft,
   BookOpen,
 } from 'lucide-react';
 
 export const StudentDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === 'ar';
+  const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
 
   // Mock list of assigned exams for Phase 1 view
   const assignedExams = [
     {
       id: '1',
-      title: 'PMP Practice Simulation Exam #1',
+      title: isRtl ? 'اختبار محاكاة PMP التجريبي الأول' : 'PMP Practice Simulation Exam #1',
       category: 'PMP',
       durationMinutes: 180,
       totalQuestions: 180,
       passingScore: 75,
       status: 'available',
-      deadline: 'Tomorrow, 11:59 PM',
+      deadline: isRtl ? 'غداً، 11:59 مساءً' : 'Tomorrow, 11:59 PM',
     },
     {
       id: '2',
-      title: 'Agile & Hybrid Methodologies Quiz',
+      title: isRtl ? 'اختبار إدارة المشاريع الرشيقة والهجينة' : 'Agile & Hybrid Methodologies Quiz',
       category: 'PMP',
       durationMinutes: 45,
       totalQuestions: 30,
@@ -38,7 +43,7 @@ export const StudentDashboard = () => {
       status: 'completed',
       score: 83,
       isPassed: true,
-      submittedAt: 'Nov 18, 2026',
+      submittedAt: isRtl ? '18 نوفمبر 2026' : 'Nov 18, 2026',
     },
   ];
 
@@ -48,26 +53,28 @@ export const StudentDashboard = () => {
       <div className="bg-gradient-to-r from-blue-900 to-indigo-950 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-500/30 text-blue-200 border border-blue-400/30">
-                Track: {user?.category || 'PMP'}
+                {t('student.dashboard.trackBadge', { track: user?.category || 'PMP' })}
               </span>
               <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                Status: Active
+                {t('student.dashboard.statusActive')}
               </span>
             </div>
-            <h1 className="text-2xl font-bold mt-2">Welcome, {user?.name}!</h1>
+            <h1 className="text-2xl font-bold mt-2">
+              {t('student.dashboard.welcome', { name: user?.name || '' })}
+            </h1>
             <p className="text-slate-300 text-sm mt-1 max-w-xl">
-              Access your scheduled examination sessions, answer questions within allotted time limits, and review your performance.
+              {t('student.dashboard.subtitle')}
             </p>
           </div>
           <div>
             <button
               onClick={() => navigate('/student/exams')}
-              className="flex items-center space-x-2 bg-brand-500 hover:bg-brand-600 text-white px-4 py-2.5 rounded-xl font-medium shadow-md transition-colors text-sm"
+              className="flex items-center space-x-2 rtl:space-x-reverse bg-brand-500 hover:bg-brand-600 text-white px-4 py-2.5 rounded-xl font-medium shadow-md transition-colors text-sm"
             >
               <PlayCircle className="w-4 h-4" />
-              <span>Go to Available Exams</span>
+              <span>{t('student.dashboard.goToExams')}</span>
             </button>
           </div>
         </div>
@@ -76,9 +83,9 @@ export const StudentDashboard = () => {
       {/* Available Exams Section */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-slate-800 flex items-center space-x-2">
+          <h2 className="text-lg font-bold text-slate-800 flex items-center space-x-2 rtl:space-x-reverse">
             <FileSpreadsheet className="w-5 h-5 text-brand-600" />
-            <span>Assigned Examination Sessions</span>
+            <span>{t('student.dashboard.assignedHeading')}</span>
           </h2>
         </div>
 
@@ -94,54 +101,58 @@ export const StudentDashboard = () => {
                     {exam.category}
                   </span>
                   {exam.status === 'available' ? (
-                    <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center space-x-1">
+                    <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center space-x-1 rtl:space-x-reverse">
                       <Clock className="w-3 h-3" />
-                      <span>Ready to Start</span>
+                      <span>{t('student.dashboard.readyToStart')}</span>
                     </span>
                   ) : (
-                    <span className="text-xs font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full flex items-center space-x-1">
+                    <span className="text-xs font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full flex items-center space-x-1 rtl:space-x-reverse">
                       <CheckCircle className="w-3 h-3 text-emerald-600" />
-                      <span>Completed ({exam.score}%)</span>
+                      <span>{t('student.dashboard.completedWithScore', { score: exam.score })}</span>
                     </span>
                   )}
                 </div>
 
                 <h3 className="font-semibold text-slate-900 text-base">{exam.title}</h3>
 
-                <div className="mt-3 flex items-center space-x-4 text-xs text-slate-500">
-                  <span className="flex items-center space-x-1">
+                <div className="mt-3 flex items-center space-x-4 rtl:space-x-reverse text-xs text-slate-500">
+                  <span className="flex items-center space-x-1 rtl:space-x-reverse">
                     <Clock className="w-3.5 h-3.5" />
-                    <span>{exam.durationMinutes} mins</span>
+                    <span>{exam.durationMinutes} {t('common.minutes')}</span>
                   </span>
-                  <span className="flex items-center space-x-1">
+                  <span className="flex items-center space-x-1 rtl:space-x-reverse">
                     <BookOpen className="w-3.5 h-3.5" />
-                    <span>{exam.totalQuestions} questions</span>
+                    <span>{exam.totalQuestions} {t('common.questions')}</span>
                   </span>
-                  <span>Pass mark: {exam.passingScore}%</span>
+                  <span>{t('student.dashboard.passMark', { score: exam.passingScore })}</span>
                 </div>
               </div>
 
               <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
                 {exam.status === 'available' ? (
                   <>
-                    <span className="text-xs text-amber-600 font-medium">Due: {exam.deadline}</span>
+                    <span className="text-xs text-amber-600 font-medium">
+                      {t('student.dashboard.due', { deadline: exam.deadline })}
+                    </span>
                     <button
-                      onClick={() => navigate(`/student/exam/${exam.id}`)}
-                      className="px-3.5 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-colors"
+                      onClick={() => navigate('/student/exams')}
+                      className="px-3.5 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 rtl:space-x-reverse transition-colors"
                     >
-                      <span>Start Attempt</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <span>{t('student.dashboard.startAttempt')}</span>
+                      <ArrowIcon className="w-3.5 h-3.5" />
                     </button>
                   </>
                 ) : (
                   <>
-                    <span className="text-xs text-slate-500">Submitted {exam.submittedAt}</span>
+                    <span className="text-xs text-slate-500">
+                      {t('student.dashboard.submitted', { date: exam.submittedAt })}
+                    </span>
                     <button
                       onClick={() => navigate(`/student/results/${exam.id}`)}
-                      className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-colors"
+                      className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center space-x-1.5 rtl:space-x-reverse transition-colors"
                     >
-                      <span>Review Score</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <span>{t('student.dashboard.reviewScore')}</span>
+                      <ArrowIcon className="w-3.5 h-3.5" />
                     </button>
                   </>
                 )}

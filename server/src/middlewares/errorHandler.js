@@ -12,7 +12,11 @@ const errorHandler = (err, req, res, next) => {
 
   // Mongoose duplicate key
   if (err.code === 11000) {
-    const field = Object.keys(err.keyValue)[0];
+    const field = Object.keys(err.keyValue || {})[0];
+    if (field === 'exam' || err.message?.includes('exam_1_student_1_attemptNumber_1')) {
+      const message = 'An attempt for this exam is already in progress or has been registered. Please resume your active attempt.';
+      return res.status(400).json({ success: false, message });
+    }
     const message = `Duplicate value entered for ${field}. Please use another value.`;
     return res.status(400).json({ success: false, message });
   }

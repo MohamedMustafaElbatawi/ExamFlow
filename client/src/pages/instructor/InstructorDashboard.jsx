@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import {
   Users,
@@ -11,18 +12,54 @@ import {
   Clock,
   CheckCircle,
   ArrowRight,
+  ArrowLeft,
   TrendingUp,
 } from 'lucide-react';
 
 export const InstructorDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === 'ar';
+  const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
 
   const stats = [
-    { title: 'Enrolled Students', value: '24', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50', change: '+4 this week' },
-    { title: 'Questions in Bank', value: '185', icon: HelpCircle, color: 'text-emerald-600', bg: 'bg-emerald-50', change: 'PMP: 120 | MPA: 65' },
-    { title: 'Active Exams', value: '3', icon: FileSpreadsheet, color: 'text-purple-600', bg: 'bg-purple-50', change: '2 PMP, 1 MPA' },
-    { title: 'Pending Grading', value: '5', icon: GraduationCap, color: 'text-amber-600', bg: 'bg-amber-50', change: 'Requires review' },
+    {
+      title: t('instructor.dashboard.totalStudents'),
+      value: '24',
+      icon: Users,
+      color: 'text-blue-600',
+      bg: 'bg-blue-50',
+      change: t('instructor.dashboard.changeStudents'),
+      link: '/instructor/students',
+    },
+    {
+      title: t('instructor.dashboard.totalQuestions'),
+      value: '185',
+      icon: HelpCircle,
+      color: 'text-emerald-600',
+      bg: 'bg-emerald-50',
+      change: t('instructor.dashboard.changeQuestions'),
+      link: '/instructor/questions',
+    },
+    {
+      title: t('instructor.dashboard.activeExams'),
+      value: '3',
+      icon: FileSpreadsheet,
+      color: 'text-purple-600',
+      bg: 'bg-purple-50',
+      change: t('instructor.dashboard.changeExams'),
+      link: '/instructor/exams',
+    },
+    {
+      title: t('instructor.dashboard.pendingGrading'),
+      value: '5',
+      icon: GraduationCap,
+      color: 'text-amber-600',
+      bg: 'bg-amber-50',
+      change: t('instructor.dashboard.changeGrading'),
+      link: '/instructor/results',
+    },
   ];
 
   return (
@@ -32,27 +69,29 @@ export const InstructorDashboard = () => {
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-brand-500/30 text-brand-200 border border-brand-400/30">
-              Instructor Administration
+              {t('instructor.dashboard.badge')}
             </span>
-            <h1 className="text-2xl font-bold mt-2">Welcome back, {user?.name || 'Instructor'}!</h1>
+            <h1 className="text-2xl font-bold mt-2">
+              {t('instructor.dashboard.welcome', { name: user?.name || 'Instructor' })}
+            </h1>
             <p className="text-slate-300 text-sm mt-1 max-w-xl">
-              Manage your PMP and MPA questions, schedule live examination sessions, review answers, and monitor cohort performance.
+              {t('instructor.dashboard.subtitle')}
             </p>
           </div>
           <div className="flex flex-wrap gap-2.5">
             <button
               onClick={() => navigate('/instructor/exams/create')}
-              className="flex items-center space-x-2 bg-brand-600 hover:bg-brand-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow transition-colors"
+              className="flex items-center space-x-2 rtl:space-x-reverse bg-brand-600 hover:bg-brand-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow transition-colors"
             >
               <PlusCircle className="w-4 h-4" />
-              <span>Create Exam</span>
+              <span>{t('instructor.dashboard.createExam')}</span>
             </button>
             <button
               onClick={() => navigate('/instructor/import')}
-              className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium border border-white/20 transition-colors"
+              className="flex items-center space-x-2 rtl:space-x-reverse bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium border border-white/20 transition-colors"
             >
               <FileUp className="w-4 h-4" />
-              <span>Import Word / Excel</span>
+              <span>{t('instructor.dashboard.importQuestions')}</span>
             </button>
           </div>
         </div>
@@ -63,7 +102,11 @@ export const InstructorDashboard = () => {
         {stats.map((stat, i) => {
           const Icon = stat.icon;
           return (
-            <div key={i} className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex items-start justify-between">
+            <div
+              key={i}
+              onClick={() => stat.link && navigate(stat.link)}
+              className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex items-start justify-between cursor-pointer hover:border-brand-300 hover:shadow-md transition-all"
+            >
               <div>
                 <p className="text-xs font-medium text-slate-500">{stat.title}</p>
                 <h3 className="text-2xl font-bold text-slate-900 mt-1">{stat.value}</h3>
@@ -85,17 +128,17 @@ export const InstructorDashboard = () => {
             <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center mb-3">
               <HelpCircle className="w-5 h-5" />
             </div>
-            <h4 className="font-bold text-slate-900">Question Bank Management</h4>
+            <h4 className="font-bold text-slate-900">{t('instructor.dashboard.qbCardTitle')}</h4>
             <p className="text-xs text-slate-600 mt-1">
-              Author single-choice, multiple-choice, and essay questions with bilingual English & Arabic explanations.
+              {t('instructor.dashboard.qbCardDesc')}
             </p>
           </div>
           <button
             onClick={() => navigate('/instructor/questions')}
             className="mt-4 flex items-center justify-between text-xs font-semibold text-brand-600 hover:text-brand-800 transition-colors"
           >
-            <span>Open Question Bank</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>{t('instructor.dashboard.qbCardAction')}</span>
+            <ArrowIcon className="w-4 h-4" />
           </button>
         </div>
 
@@ -105,17 +148,17 @@ export const InstructorDashboard = () => {
             <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center mb-3">
               <FileUp className="w-5 h-5" />
             </div>
-            <h4 className="font-bold text-slate-900">Batch Question Import</h4>
+            <h4 className="font-bold text-slate-900">{t('instructor.dashboard.importCardTitle')}</h4>
             <p className="text-xs text-slate-600 mt-1">
-              Upload .docx or .xlsx files, validate parsed questions, edit mistakes directly in table preview, and bulk import.
+              {t('instructor.dashboard.importCardDesc')}
             </p>
           </div>
           <button
             onClick={() => navigate('/instructor/import')}
             className="mt-4 flex items-center justify-between text-xs font-semibold text-brand-600 hover:text-brand-800 transition-colors"
           >
-            <span>Import Questions</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>{t('instructor.dashboard.importCardAction')}</span>
+            <ArrowIcon className="w-4 h-4" />
           </button>
         </div>
 
@@ -125,17 +168,17 @@ export const InstructorDashboard = () => {
             <div className="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center mb-3">
               <FileSpreadsheet className="w-5 h-5" />
             </div>
-            <h4 className="font-bold text-slate-900">Exam Builder & Scheduling</h4>
+            <h4 className="font-bold text-slate-900">{t('instructor.dashboard.builderCardTitle')}</h4>
             <p className="text-xs text-slate-600 mt-1">
-              Construct timed exams with manual selection or random pool generation, pass thresholds, and attempt limits.
+              {t('instructor.dashboard.builderCardDesc')}
             </p>
           </div>
           <button
             onClick={() => navigate('/instructor/exams')}
             className="mt-4 flex items-center justify-between text-xs font-semibold text-brand-600 hover:text-brand-800 transition-colors"
           >
-            <span>Manage Exams</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>{t('instructor.dashboard.builderCardAction')}</span>
+            <ArrowIcon className="w-4 h-4" />
           </button>
         </div>
       </div>

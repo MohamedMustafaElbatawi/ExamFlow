@@ -1,9 +1,12 @@
 import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export const ModulePlaceholder = ({ title, moduleName, phase }) => {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
 
   return (
     <div className="bg-white rounded-xl p-10 border border-slate-200 text-center max-w-2xl mx-auto my-8 shadow-sm">
@@ -12,14 +15,22 @@ export const ModulePlaceholder = ({ title, moduleName, phase }) => {
       </div>
       <h2 className="text-xl font-bold text-slate-800">{title}</h2>
       <p className="text-slate-500 text-sm mt-2">
-        The <span className="font-semibold text-slate-700">{moduleName}</span> module is scheduled for implementation in <strong>{phase || 'upcoming phase'}</strong> according to the project roadmap.
+        {isAr ? (
+          <>
+            وحدة <span className="font-semibold text-slate-700">{moduleName}</span> قيد التطوير وفقاً لخارطة طريق المشروع.
+          </>
+        ) : (
+          <>
+            The <span className="font-semibold text-slate-700">{moduleName}</span> module is scheduled for implementation in <strong>{phase || 'upcoming phase'}</strong> according to the project roadmap.
+          </>
+        )}
       </p>
       <button
         onClick={() => navigate(-1)}
-        className="mt-6 inline-flex items-center space-x-2 text-sm text-brand-600 font-semibold hover:text-brand-700"
+        className="mt-6 inline-flex items-center space-x-2 rtl:space-x-reverse text-sm text-brand-600 font-semibold hover:text-brand-700"
       >
-        <ArrowLeft className="w-4 h-4" />
-        <span>Return to Dashboard</span>
+        <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+        <span>{t('student.activeExam.returnHome', 'Return')}</span>
       </button>
     </div>
   );
