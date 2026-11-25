@@ -6,7 +6,7 @@ const ActivityLog = require('../models/ActivityLog');
 const generateToken = (id) => {
   return jwt.sign(
     { id },
-    process.env.JWT_SECRET || 'examflow_jwt_super_secret_key_2026_change_in_production',
+    process.env.JWT_SECRET,
     {
       expiresIn: process.env.JWT_EXPIRES_IN || '7d',
     }

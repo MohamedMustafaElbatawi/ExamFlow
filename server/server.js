@@ -7,9 +7,6 @@ const errorHandler = require('./src/middlewares/errorHandler');
 
 const app = express();
 
-// Connect to Database
-connectDB();
-
 // Middleware
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:5173',
@@ -28,6 +25,24 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+app.use('/api', (req, res, next) => {
+  const missing = [];
+  if (process.env.NODE_ENV === 'production') {
+    if (!process.env.MONGODB_URI) missing.push('MONGODB_URI');
+    if (!process.env.JWT_SECRET) missing.push('JWT_SECRET');
+    if (!process.env.CLIENT_URL) missing.push('CLIENT_URL');
+  }
+
+  if (missing.length) {
+    console.error('[Configuration] Missing required environment variables', { names: missing });
+    const error = new Error('Server configuration is incomplete.');
+    error.statusCode = 500;
+    return next(error);
+  }
+
+  return connectDB().then(() => next()).catch(next);
+});
+
 // Serve static uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -44,13 +59,16 @@ app.use('/api/notifications', require('./src/routes/notificationRoutes'));
 // Global Error Handler
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`[ExamFlow API] Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  });
+}
 
-const server = app.listen(PORT, () => {
-  console.log(`[ExamFlow API] Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-});
+module.exports = app;
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
-  console.error(`[Unhandled Rejection] ${err.message}`);
+  console.error('[Unhandled Rejection]', { name: err.name, code: err.code });
 });

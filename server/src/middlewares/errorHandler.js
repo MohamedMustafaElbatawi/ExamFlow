@@ -2,7 +2,13 @@ const errorHandler = (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
 
-  console.error('[Error Details]', err);
+  console.error('[Request Error]', {
+    method: req.method,
+    path: req.path,
+    name: err.name,
+    code: err.code,
+    statusCode: err.statusCode,
+  });
 
   // Mongoose bad ObjectId
   if (err.name === 'CastError') {
@@ -27,9 +33,12 @@ const errorHandler = (err, req, res, next) => {
     return res.status(400).json({ success: false, message });
   }
 
-  res.status(error.statusCode || 500).json({
+  const statusCode = error.statusCode || 500;
+  res.status(statusCode).json({
     success: false,
-    message: error.message || 'Server Internal Error',
+    message: statusCode >= 500 && process.env.NODE_ENV === 'production'
+      ? 'Server Internal Error'
+      : error.message || 'Server Internal Error',
   });
 };
 

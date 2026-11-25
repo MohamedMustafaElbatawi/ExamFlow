@@ -1,17 +1,26 @@
 const mongoose = require('mongoose');
 
+let connectionPromise;
+
 const connectDB = async () => {
+  const state = mongoose.connection.readyState;
+  if (state === 1) return mongoose.connection;
+  if (state === 2) return mongoose.connection.asPromise();
+  connectionPromise = undefined;
+
+  if (!process.env.MONGODB_URI && process.env.NODE_ENV === 'production') {
+    throw new Error('MONGODB_URI is required in production.');
+  }
+
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/examflow');
+    connectionPromise = mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/examflow');
+    const conn = await connectionPromise;
     console.log(`[Database] MongoDB Connected: ${conn.connection.host}`);
     return conn;
   } catch (error) {
-    console.error(`[Database Error] Failed to connect to MongoDB: ${error.message}`);
-    console.error(`[Database Hint] Ensure MongoDB is running locally or provide a valid MONGODB_URI in server/.env`);
-    // In production we would exit, but in development allow server to remain up with health indicators
-    if (process.env.NODE_ENV === 'production') {
-      process.exit(1);
-    }
+    connectionPromise = undefined;
+    console.error('[Database] MongoDB connection failed', { name: error.name, code: error.code });
+    throw error;
   }
 };
 
